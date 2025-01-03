@@ -12,7 +12,7 @@ const Home = () => {
 
   // Function to initiate the login process (step 1)
   const login = async () => {
-    const apiKey = 'AbVsD45H';  // Replace with your actual API key
+    const apiKey = '7a5C23yx';  // Replace with your actual API key
     const stateVariable = 'stateVariable';  // This can be any value used to track state
 
     window.location.href = `https://smartapi.angelone.in/publisher-login?api_key=${apiKey}&state=${stateVariable}`;
