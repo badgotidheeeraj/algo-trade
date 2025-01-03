@@ -7,27 +7,25 @@ const Home = () => {
   const [authToken, setAuthToken] = useState(null);
   const [feedToken, setFeedToken] = useState(null);
 
-  // Function to initiate the login process
+  // Function to initiate login
   const login = () => {
-    const apiKey = '7a5C23yx';  // Replace with your actual API key
-    const stateVariable = 'stateVariable';  // This can be any value used to track state
-
-    // Redirect to the SmartAPI login endpoint
+    const apiKey = '7a5C23yx'; // Replace with your API key
+    const stateVariable = 'stateVariable'; // State variable for redirection tracking
     window.location.href = `https://smartapi.angelone.in/publisher-login?api_key=${apiKey}&state=${stateVariable}`;
   };
 
-  // Function to handle login redirect and extract auth_token and feed_token
+  // Function to handle login redirect
   const handleLoginRedirect = (authToken, feedToken) => {
     setAuthToken(authToken);
     setFeedToken(feedToken);
 
-    // After storing tokens, fetch the user profile
+    // Fetch user profile after obtaining tokens
     fetchUserProfile(authToken);
   };
 
-  // Function to fetch user profile using auth_token
+  // Function to fetch user profile
   const fetchUserProfile = async (authToken) => {
-    console.log('Fetching profile...',authToken);
+    console.log('Using Auth Token for profile:', authToken);
     const config = {
       method: 'get',
       url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getProfile',
@@ -41,16 +39,22 @@ const Home = () => {
     try {
       const response = await axios(config);
       console.log('Profile Response:', response.data);
-      setData(response.data);  
+      setData(response.data);
     } catch (err) {
-      console.error('Error fetching profile:', err);
-      setError('Error fetching profile');
+      console.error(
+        'Error Fetching Profile:',
+        err.response ? err.response.data : err.message
+      );
+      setError(
+        err.response?.data?.message || 'Error fetching profile. Check the logs.'
+      );
     }
   };
 
-  // Function to refresh JWT token using refresh token
+  // Function to refresh JWT token
   const refreshToken = async () => {
-    const refreshToken = 'your_refresh_token';  // Replace with actual refresh token
+    const refreshToken = 'your_refresh_token'; // Replace with the actual refresh token
+    console.log('Refreshing token...');
     const config = {
       method: 'post',
       url: 'https://apiconnect.angelone.in/rest/auth/angelbroking/jwt/v1/generateTokens',
@@ -65,25 +69,29 @@ const Home = () => {
     try {
       const response = await axios(config);
       console.log('New Tokens:', response.data);
-      setAuthToken(response.data.auth_token);  // Set the new auth token
-      setFeedToken(response.data.feed_token);  // Set the new feed token
+      setAuthToken(response.data.auth_token); // Update with the new auth token
+      setFeedToken(response.data.feed_token); // Update with the new feed token
     } catch (err) {
-      console.error('Error refreshing token:', err);
-      setError('Error refreshing token');
+      console.error(
+        'Error Refreshing Token:',
+        err.response ? err.response.data : err.message
+      );
+      setError(
+        err.response?.data?.message || 'Error refreshing token. Check the logs.'
+      );
     }
   };
 
-  // Check the URL for the auth_token and feed_token when the page loads
+  // Handle login redirect and extract tokens
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authTokenFromURL = urlParams.get('auth_token');
     const feedTokenFromURL = urlParams.get('feed_token');
 
-    // If tokens are available, process the login and fetch the profile
     if (authTokenFromURL && feedTokenFromURL) {
       handleLoginRedirect(authTokenFromURL, feedTokenFromURL);
     }
-  }, []); // Run only once on component mount
+  }, []);
 
   return (
     <div>
@@ -92,7 +100,7 @@ const Home = () => {
         <button onClick={login}>Login with Angel</button>
       )}
 
-      {/* If logged in, show user profile or error */}
+      {/* Display profile and refresh token button if tokens are available */}
       {authToken && feedToken && (
         <div>
           <button onClick={refreshToken}>Refresh Token</button>
