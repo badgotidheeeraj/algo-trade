@@ -27,6 +27,7 @@ const Home = () => {
 
   // Function to fetch user profile using auth_token
   const fetchUserProfile = async (authToken) => {
+    console.log('Fetching profile...',authToken);
     const config = {
       method: 'get',
       url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getProfile',
