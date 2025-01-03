@@ -1,36 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// import { useHistory } from 'react-router-dom';
 
 const Home = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [authToken, setAuthToken] = useState(null);
   const [feedToken, setFeedToken] = useState(null);
-  // const history = useHistory(); // For redirection after successful login
 
-
-  // Function to initiate the login process (step 1)
-  const login = async () => {
+  // Function to initiate the login process
+  const login = () => {
     const apiKey = '7a5C23yx';  // Replace with your actual API key
     const stateVariable = 'stateVariable';  // This can be any value used to track state
 
+    // Redirect to the SmartAPI login endpoint
     window.location.href = `https://smartapi.angelone.in/publisher-login?api_key=${apiKey}&state=${stateVariable}`;
   };
 
-  // Function to handle login response after redirection (step 1 continuation)
-  const handleLoginRedirect = async (authToken, feedToken) => {
-    // Save the tokens in state
+  // Function to handle login redirect and extract auth_token and feed_token
+  const handleLoginRedirect = (authToken, feedToken) => {
     setAuthToken(authToken);
     setFeedToken(feedToken);
 
-    // Now fetch the user profile (step 3)
+    // After storing tokens, fetch the user profile
     fetchUserProfile(authToken);
   };
 
-  // Function to fetch user profile (step 3)
+  // Function to fetch user profile using auth_token
   const fetchUserProfile = async (authToken) => {
-    console.log('Fetching profile...',authToken);
     const config = {
       method: 'get',
       url: 'https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getProfile',
@@ -44,14 +40,14 @@ const Home = () => {
     try {
       const response = await axios(config);
       console.log('Profile Response:', response.data);
-      setData(response.data);  // Store profile data
+      setData(response.data);  
     } catch (err) {
       console.error('Error fetching profile:', err);
       setError('Error fetching profile');
     }
   };
 
-  // Function to refresh JWT token (step 2)
+  // Function to refresh JWT token using refresh token
   const refreshToken = async () => {
     const refreshToken = 'your_refresh_token';  // Replace with actual refresh token
     const config = {
@@ -76,24 +72,26 @@ const Home = () => {
     }
   };
 
-  // UseEffect to check for query params (this runs after redirect)
+  // Check the URL for the auth_token and feed_token when the page loads
   useEffect(() => {
-    // Assuming the redirected URL contains auth_token and feed_token as query parameters
     const urlParams = new URLSearchParams(window.location.search);
     const authTokenFromURL = urlParams.get('auth_token');
     const feedTokenFromURL = urlParams.get('feed_token');
 
+    // If tokens are available, process the login and fetch the profile
     if (authTokenFromURL && feedTokenFromURL) {
-      handleLoginRedirect(authTokenFromURL, feedTokenFromURL);  // Handle the login response (step 1 continuation)
+      handleLoginRedirect(authTokenFromURL, feedTokenFromURL);
     }
-  }, []);
+  }, []); // Run only once on component mount
 
   return (
     <div>
+      {/* Display login button if tokens are not available */}
       {!authToken && !feedToken && (
         <button onClick={login}>Login with Angel</button>
       )}
 
+      {/* If logged in, show user profile or error */}
       {authToken && feedToken && (
         <div>
           <button onClick={refreshToken}>Refresh Token</button>
